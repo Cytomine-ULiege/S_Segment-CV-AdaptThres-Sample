@@ -1,0 +1,122 @@
+{
+  "name": "SampleDetector",
+  "description": "Detect samples in images using an adaptive threshold.",
+  "container-image": {
+    "image": "cytomineuliege/s_sampledetector",
+    "index": "docker://",
+    "type": "singularity"
+  },
+  "command-line": "echo [CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [CYTOMINE_ID_PREDICTED_TERM] [MAX_IMAGE_SIZE] [THRESHOLD_CONSTANT] [THRESHOLD_BLOCKSIZE] [ERODE_ITERATIONS] [DILATE_ITERATIONS]",
+  "inputs": [
+    {
+      "id": "cytomine_host",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine host",
+      "set-by-server": true,
+      "optional": false,
+      "type": "String"
+    },
+    {
+      "id": "cytomine_public_key",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine public key",
+      "set-by-server": true,
+      "optional": false,
+      "type": "String"
+    },
+    {
+      "id": "cytomine_private_key",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine public key",
+      "set-by-server": true,
+      "optional": false,
+      "type": "String"
+    },
+    {
+      "id": "cytomine_id_project",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine project ID",
+      "set-by-server": true,
+      "optional": false,
+      "type": "Number"
+    },
+    {
+      "id": "cytomine_id_software",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine software ID",
+      "set-by-server": true,
+      "optional": false,
+      "type": "Number"
+    },
+    {
+      "id": "cytomine_id_predicted_term",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Term to predict",
+      "description": "The term that will be associated to detected samples",
+      "optional": false,
+      "type": "Domain",
+      "uri": "/api/ontology/$currentOntology$/term.json",
+      "uri-print-attribute": "name",
+      "uri-sort-attribute": "name"
+    },
+    {
+      "id": "max_image_size",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Maximum image size",
+      "description": "Image is resized during the detection if the real image is larger.",
+      "optional": false,
+      "type": "Number",
+      "integer": true,
+      "default-value": "2048"
+    },
+    {
+      "id": "threshold_blocksize",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Threshold block size",
+      "description": "Size of a pixel neighborhood that is used to calculate a threshold value for the pixel",
+      "optional": false,
+      "type": "Number",
+      "default-value": "951"
+    },
+    {
+      "id": "threshold_constant",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Threshold constant",
+      "description": "Constant C used in the computation of threshold value T(x,y) which is the weighted sum of the blockSize * blockSize neighborhood of (x,y) - C",
+      "optional": false,
+      "type": "Number",
+      "default-value": "5"
+    },
+    {
+      "id": "erode_iterations",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Number of erosions",
+      "optional": false,
+      "type": "Number",
+      "integer": true,
+      "default-value": "3"
+    },
+    {
+      "id": "dilate_iterations",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Number of dilations",
+      "optional": false,
+      "type": "Number",
+      "integer": true,
+      "default-value": "3"
+    }
+  ],
+
+  "schema-version": "cytomine-0.1"
+}
