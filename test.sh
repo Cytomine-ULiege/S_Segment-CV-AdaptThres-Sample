@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # * Copyright (c) 2009-2018. Authors: see NOTICE file.
 # *
@@ -24,7 +24,13 @@ CYTOMINE_ID_PROJECT=$4
 CYTOMINE_ID_SOFTWARE=$5
 CYTOMINE_ID_TERM=$6
 
-docker run -it cytomineuliege/s_sampledetector --cytomine_host $CYTOMINE_HOST \
+ADD_HOST=""
+if [[ $CYTOMINE_HOST = *"localhost"* ]];
+then
+    ADD_HOST="--add-host=${CYTOMINE_HOST}:172.17.0.1"
+fi
+
+docker run $ADD_HOST -it cytomineuliege/s_sampledetector --cytomine_host $CYTOMINE_HOST \
    --cytomine_public_key $CYTOMINE_PUBLIC_KEY \
    --cytomine_private_key $CYTOMINE_PRIVATE_KEY \
    --cytomine_id_project $CYTOMINE_ID_PROJECT \
