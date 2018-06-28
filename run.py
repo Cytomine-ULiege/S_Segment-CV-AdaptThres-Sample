@@ -72,7 +72,7 @@ def main(argv):
     with CytomineJob.from_cli(argv) as cj:
 
         images = ImageInstanceCollection().fetch_with_filter("project", cj.parameters.cytomine_id_project)
-        for image in images:
+        for image in cj.monitor(images, prefix="Running detection on image", period=0.1):
             # Resize image if needed
             resize_ratio = max(image.width, image.height) / cj.parameters.max_image_size
             if resize_ratio < 1:
@@ -126,6 +126,8 @@ def main(argv):
                         annotations = AnnotationCollection()
 
             annotations.save()
+
+        cj.job.update(statusComment="Finished.")
 
 
 if __name__ == "__main__":
