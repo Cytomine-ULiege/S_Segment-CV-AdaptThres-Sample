@@ -24,7 +24,7 @@ CYTOMINE_ID_PROJECT=$4
 CYTOMINE_ID_SOFTWARE=$5
 CYTOMINE_ID_TERM=$6
 
-python run.py --cytomine_host $CYTOMINE_HOST \
+docker run -it cytomineuliege/s_sampledetector --cytomine_host $CYTOMINE_HOST \
    --cytomine_public_key $CYTOMINE_PUBLIC_KEY \
    --cytomine_private_key $CYTOMINE_PRIVATE_KEY \
    --cytomine_id_project $CYTOMINE_ID_PROJECT \
