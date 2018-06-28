@@ -1,7 +1,7 @@
 
 FROM cytomineuliege/software-python3-base:latest
 
-WORKDIR /app
+RUN mkdir -p /app
 
 ADD run.py /app/run.py
 
