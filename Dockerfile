@@ -1,5 +1,5 @@
 
-FROM cytomineuliege/software-python3-base
+FROM cytomineuliege/software-python3-base:latest
 
 WORKDIR /app
 
