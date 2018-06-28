@@ -30,7 +30,7 @@
       "id": "cytomine_private_key",
       "value-key": "[@ID]",
       "command-line-flag": "--@id",
-      "name": "Cytomine public key",
+      "name": "Cytomine private key",
       "set-by-server": true,
       "optional": false,
       "type": "String"
