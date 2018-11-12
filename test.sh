@@ -24,7 +24,7 @@ CYTOMINE_ID_PROJECT=$4
 CYTOMINE_ID_SOFTWARE=$5
 CYTOMINE_ID_TERM=$6
 
-IMAGE="cytomineuliege/s_sampledetector"
+IMAGE="cytomineuliege/s_segment-cv-adaptthres-sample"
 
 ADD_HOST=""
 if [[ $CYTOMINE_HOST = *"localhost"* ]];
