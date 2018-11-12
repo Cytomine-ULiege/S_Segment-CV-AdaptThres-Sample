@@ -1,8 +1,8 @@
 {
-  "name": "SampleDetector",
+  "name": "Segment-CV-AdaptThres-Sample",
   "description": "Detect samples in images using an adaptive threshold.",
   "container-image": {
-    "image": "cytomineuliege/s_sampledetector",
+    "image": "cytomineuliege/s_segment-cv-adaptthres-sample",
     "index": "docker://",
     "type": "singularity"
   },
