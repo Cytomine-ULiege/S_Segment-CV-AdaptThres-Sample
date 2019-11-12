@@ -81,10 +81,12 @@ def main(argv):
             resized_width = int(image.width / resize_ratio)
             resized_height = int(image.height / resize_ratio)
 
-            image.dump(dest_pattern="/tmp/{id}.jpg", max_size=max(resized_width, resized_height), bits=image.bitDepth)
+            bit_depth = image.bitDepth if image.bitDepth is not None else 8
+
+            image.dump(dest_pattern="/tmp/{id}.jpg", max_size=max(resized_width, resized_height), bits=bit_depth)
             img = cv2.imread(image.filename, cv2.IMREAD_GRAYSCALE)
 
-            thresholded_img = cv2.adaptiveThreshold(img, 2**image.bitDepth, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            thresholded_img = cv2.adaptiveThreshold(img, 2**bit_depth, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                                     cv2.THRESH_BINARY, cj.parameters.threshold_blocksize,
                                                     cj.parameters.threshold_constant)
 
