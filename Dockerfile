@@ -1,5 +1,5 @@
 
-FROM cytomineuliege/software-python3-base:latest
+FROM cytomineuliege/software-python3-base:v2.2.0-py3.6.8
 
 RUN mkdir -p /app
 
