@@ -9,4 +9,4 @@ from Cytomine-Core) and upload detected geometries to Cytomine-Core (in a userjo
 
 -----------------------------------------------------------------------------
 
-Copyright 2010-2018 University of Liège, Belgium, http://www.cytomine.be/
+Copyright 2010-2019 University of Liège, Belgium, https://uliege.cytomine.org
