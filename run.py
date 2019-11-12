@@ -33,7 +33,7 @@ __copyright__ = "Copyright 2010-2019 University of Liège, Belgium, https://ulie
 
 
 def find_components(image):
-    _, contours, hierarchy = cv2.findContours(image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     components = []
     if len(contours) > 0:
