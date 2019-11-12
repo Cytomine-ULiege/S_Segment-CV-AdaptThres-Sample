@@ -6,7 +6,7 @@
     "index": "docker://",
     "type": "singularity"
   },
-  "command-line": "echo [CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [CYTOMINE_ID_PREDICTED_TERM] [MAX_IMAGE_SIZE] [THRESHOLD_CONSTANT] [THRESHOLD_BLOCKSIZE] [ERODE_ITERATIONS] [DILATE_ITERATIONS]",
+  "command-line": "[CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [LOG_LEVEL] [CYTOMINE_ID_PREDICTED_TERM] [MAX_IMAGE_SIZE] [THRESHOLD_CONSTANT] [THRESHOLD_BLOCKSIZE] [ERODE_ITERATIONS] [DILATE_ITERATIONS]",
   "inputs": [
     {
       "id": "cytomine_host",
@@ -115,6 +115,15 @@
       "type": "Number",
       "integer": true,
       "default-value": "3"
+    },
+    {
+      "id": "log_level",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Level of log: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'",
+      "set-by-server": false,
+      "optional": true,
+      "type": "String"
     }
   ],
 
