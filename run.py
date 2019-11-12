@@ -96,7 +96,7 @@ def main(argv):
 
             extension = 10
             extended_img = cv2.copyMakeBorder(dilated_img, extension, extension, extension, extension,
-                                              cv2.BORDER_CONSTANT, value=2**image.bitDepth)
+                                              cv2.BORDER_CONSTANT, value=2**bit_depth)
 
             components = find_components(extended_img)
             zoom_factor = image.width / float(resized_width)
