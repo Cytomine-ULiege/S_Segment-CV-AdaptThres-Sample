@@ -1,5 +1,5 @@
 
-FROM cytomine/software-python3-base
+FROM cytomine/software-python3-base:v2.2.0
 
 RUN pip install opencv-python-headless==4.1.2.30
 
