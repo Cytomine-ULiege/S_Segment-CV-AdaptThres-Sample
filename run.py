@@ -114,7 +114,7 @@ def main(argv):
             components.remove(largest)
 
             # Only keep components greater than 5% of whole image
-            min_area = int(0.05 * image.width * image.height)
+            min_area = int((cj.parameters.image_area_perc_threshold/100) * image.width * image.height)
 
             annotations = AnnotationCollection()
             for component in components:
