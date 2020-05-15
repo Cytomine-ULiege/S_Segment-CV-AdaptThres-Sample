@@ -11,6 +11,9 @@ To launch such an analysis, a user first specify a Cytomine term identifier. The
 
 * **Based on:** Adaptive Thresholding (https://docs.opencv.org/3.4/d7/d4d/tutorial_py_thresholding.html) but code can be easily adapted to other thresholding algorithms.
 
+* **Example on [CMU-1 open image](https://cytomine.coop/collection/cmu-1/cmu-1-ndpi)**  with the *Image Area Percentile Threshold* parameter to 3.
+![AdaptThreshold](https://user-images.githubusercontent.com/8018298/82058049-8063c500-96c4-11ea-966e-52d8669a2898.png)
+
 -----------------------------------------------------------------------------
 
 Copyright 2010-2020 University of Liège, Belgium, https://uliege.cytomine.org
