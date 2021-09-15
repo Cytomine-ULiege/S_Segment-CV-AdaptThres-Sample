@@ -6,7 +6,7 @@
     "index": "docker://",
     "type": "singularity"
   },
-  "command-line": "[CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [LOG_LEVEL] [CYTOMINE_ID_PREDICTED_TERM] [MAX_IMAGE_SIZE] [THRESHOLD_CONSTANT] [THRESHOLD_BLOCKSIZE] [ERODE_ITERATIONS] [DILATE_ITERATIONS]",
+  "command-line": "[CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [LOG_LEVEL] [CYTOMINE_ID_PREDICTED_TERM] [MAX_IMAGE_SIZE] [THRESHOLD_CONSTANT] [THRESHOLD_BLOCKSIZE] [ERODE_ITERATIONS] [DILATE_ITERATIONS] [IMAGE_AREA_PERC_THRESHOLD]",
   "inputs": [
     {
       "id": "cytomine_host",
@@ -115,6 +115,19 @@
       "type": "Number",
       "integer": true,
       "default-value": "3"
+    },
+    {
+      "id": "image_area_perc_threshold",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Image Area Percentile Threshold",
+      "description": "The detected component with an area less than the image area multipled by this percentile value will not be kept",
+      "optional": false,
+      "type": "Number",
+      "integer": true,
+      "minimum": 0,
+      "maximum": 100,
+      "default-value": "5"
     },
     {
       "id": "log_level",
