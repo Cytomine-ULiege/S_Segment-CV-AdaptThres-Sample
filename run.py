@@ -24,12 +24,13 @@ from operator import attrgetter
 import cv2
 import numpy as np
 from cytomine import CytomineJob
-from cytomine.models import ImageInstanceCollection, AnnotationCollection, Annotation
+from cytomine.models import ImageInstance, ImageInstanceCollection, AnnotationCollection, Annotation
+from cytomine.utilities.software import parse_domain_list
 from shapely.geometry import Polygon
 
 __author__ = "Rubens Ulysse <urubens@uliege.be>"
 __contributors__ = ["Marée Raphaël <raphael.maree@uliege.be>", "Stévens Benjamin"]
-__copyright__ = "Copyright 2010-2019 University of Liège, Belgium, https://uliege.cytomine.org/"
+__copyright__ = "Copyright 2010-2022 University of Liège, Belgium, https://uliege.cytomine.org/"
 
 
 def find_components(image):
@@ -71,7 +72,13 @@ def find_components(image):
 def main(argv):
     with CytomineJob.from_cli(argv) as cj:
 
-        images = ImageInstanceCollection().fetch_with_filter("project", cj.parameters.cytomine_id_project)
+        images = ImageInstanceCollection()
+        if cj.parameters.cytomine_id_images is not None:
+            id_images = parse_domain_list(cj.parameters.cytomine_id_images)
+            images.extend([ImageInstance().fetch(_id) for _id in id_images])
+        else:
+            images = images.fetch_with_filter("project", cj.parameters.cytomine_id_project)
+        
         for image in cj.monitor(images, prefix="Running detection on image", period=0.1):
             # Resize image if needed
             resize_ratio = max(image.width, image.height) / cj.parameters.max_image_size

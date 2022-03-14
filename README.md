@@ -5,7 +5,7 @@ This implementation follows Cytomine (=v3.0) external app conventions based on c
 
 * **Summary:** It applies a thresholding algorithm to a thumbnail of a whole image (downloaded from Cytomine-Core) and upload detected geometries to Cytomine-Core (in a userjob layer)
 
-To launch such an analysis, a user first specify a Cytomine term identifier. The app will then apply the algorithm to all Cytomine images belonging to the current project. Detected objects are labeled with the term identifier.
+To launch such an analysis, a user first specifies a Cytomine term identifier. The app will then apply the algorithm to specified images in the project. If not specified, all Cytomine images belonging to the current project. Detected objects are labeled with the term identifier.
 
 * **Typical application:** Detect sample regions before applying other algorithms (e.g. segmentation).
 
@@ -15,7 +15,8 @@ To launch such an analysis, a user first specify a Cytomine term identifier. The
 ![AdaptThreshold](https://user-images.githubusercontent.com/8018298/82058049-8063c500-96c4-11ea-966e-52d8669a2898.png)
 
 * **Parameters:** 
-  * *cytomine_host*, *cytomine_public_key*, *cytomine_private_key*, *cytomine_id_project* and *cytomine_id_software* are parameter needed for all Cytomine external app. They will allow the app to be run on the Cytomine instance (determined with its host), connect and communicate with the instance (with the key pair). An app is always run into a project (*cytomine_id_project*) and to be run, the app must be previously declared to the plateforme (*cytomine_id_software*).
+  * *cytomine_host*, *cytomine_public_key*, *cytomine_private_key*, *cytomine_id_project* and *cytomine_id_software* are parameters needed for all Cytomine external apps. They will allow the app to be run on the Cytomine instance (determined with its host), connect and communicate with the instance (with the key pair). An app is always run into a project (*cytomine_id_project*) and to be run, the app must be previously declared to the plateform (*cytomine_id_software*).
+  * *cytomine_id_images* : The image identifiers on which the app is run. If not specified, all images in the project will be considered.
   * *cytomine_id_predicted_term* : The detected components will be associated to a term corresponding to the given id.
   * *max_image_size* : During the run, the analyzed images will be resized if the width or the height are larger than the corresponding value of this parameter. Default value is 2048. Be careful that if you allow bigger image size, the download will take more time and, for high value, timeout can occur.
   * *image_area_perc_threshold* : The detected component with an area less than a specific value (calculated as a percentil of the image area) will not be kept. Default value is 5%. Modify this value to be able to kept smaller object. In the previous CMU-1 exemple, the input value was 3 to catch the smaller two Region Of Interest.
@@ -26,4 +27,4 @@ To launch such an analysis, a user first specify a Cytomine term identifier. The
 
 -----------------------------------------------------------------------------
 
-Copyright 2010-2020 University of Liège, Belgium, https://uliege.cytomine.org
+Copyright 2010-2022 University of Liège, Belgium, https://uliege.cytomine.org
