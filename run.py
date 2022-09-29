@@ -22,6 +22,7 @@ from __future__ import unicode_literals
 from operator import attrgetter
 
 import cv2
+import logging
 import numpy as np
 from cytomine import CytomineJob
 from cytomine.models import ImageInstanceCollection, AnnotationCollection, Annotation
@@ -30,6 +31,10 @@ from shapely.geometry import Polygon
 __author__ = "Rubens Ulysse <urubens@uliege.be>"
 __contributors__ = ["Marée Raphaël <raphael.maree@uliege.be>", "Stévens Benjamin"]
 __copyright__ = "Copyright 2010-2019 University of Liège, Belgium, https://uliege.cytomine.org/"
+
+logging.basicConfig()
+logger = logging.getLogger("cytomine.client")
+logger.setLevel(logging.INFO)
 
 
 def find_components(image):
@@ -86,17 +91,36 @@ def main(argv):
             image.dump(dest_pattern="/tmp/{id}.jpg", max_size=max(resized_width, resized_height), bits=bit_depth)
             img = cv2.imread(image.filename, cv2.IMREAD_GRAYSCALE)
 
-            thresholded_img = cv2.adaptiveThreshold(img, 2**bit_depth, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                                    cv2.THRESH_BINARY, cj.parameters.threshold_blocksize,
-                                                    cj.parameters.threshold_constant)
+            if cj.parameters.threshold_blocksize % 2 == 0:
+                logging.warning(
+                    "The threshold block size must be an odd number! "
+                    "It will be incremented by one."
+                )
+                cj.parameters.threshold_blocksize += 1
+
+            thresholded_img = cv2.adaptiveThreshold(
+                img,
+                2 ** bit_depth,
+                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv2.THRESH_BINARY,
+                cj.parameters.threshold_blocksize,
+                cj.parameters.threshold_constant
+            )
 
             kernel = np.ones((5, 5), np.uint8)
             eroded_img = cv2.erode(thresholded_img, kernel, iterations=cj.parameters.erode_iterations)
             dilated_img = cv2.dilate(eroded_img, kernel, iterations=cj.parameters.dilate_iterations)
 
             extension = 10
-            extended_img = cv2.copyMakeBorder(dilated_img, extension, extension, extension, extension,
-                                              cv2.BORDER_CONSTANT, value=2**bit_depth)
+            extended_img = cv2.copyMakeBorder(
+                dilated_img,
+                extension,
+                extension,
+                extension,
+                extension,
+                cv2.BORDER_CONSTANT,
+                value=2 ** bit_depth
+            )
 
             components = find_components(extended_img)
             zoom_factor = image.width / float(resized_width)
@@ -109,19 +133,22 @@ def main(argv):
 
                 components[i] = Polygon(converted)
 
-            # Find largest component (whole image)
+            # Find the largest component (whole image)
             largest = max(components, key=attrgetter('area'))
             components.remove(largest)
 
             # Only keep components greater than 5% of whole image
-            min_area = int((cj.parameters.image_area_perc_threshold/100) * image.width * image.height)
+            min_area = int((cj.parameters.image_area_perc_threshold / 100) * image.width * image.height)
 
             annotations = AnnotationCollection()
             for component in components:
                 if component.area > min_area:
-                    annotations.append(Annotation(location=component.wkt, id_image=image.id,
-                                                  id_terms=[cj.parameters.cytomine_id_predicted_term],
-                                                  id_project=cj.parameters.cytomine_id_project))
+                    annotations.append(Annotation(
+                        location=component.wkt,
+                        id_image=image.id,
+                        id_terms=[cj.parameters.cytomine_id_predicted_term],
+                        id_project=cj.parameters.cytomine_id_project
+                    ))
 
                     if len(annotations) % 100 == 0:
                         annotations.save()
