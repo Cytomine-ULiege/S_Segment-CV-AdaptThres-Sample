@@ -2,7 +2,7 @@
   "name": "Segment-CV-AdaptThres-Sample",
   "description": "Detect samples in images using an adaptive threshold.",
   "container-image": {
-    "image": "cytomine/s_segment-cv-adaptthres-sample",
+    "image": "s_segment-cv-adaptthres-sample",
     "index": "docker://",
     "type": "singularity"
     },
@@ -63,7 +63,7 @@
       "optional": true,
       "type": "ListDomain",
       "uri": "/api/project/$currentProject$/imageinstance.json",
-      "uri-print-attribute": "instanceFilename",
+      "uri-print-attribute": "instanceFilename"
     },
     {
       "id": "cytomine_id_predicted_term",
