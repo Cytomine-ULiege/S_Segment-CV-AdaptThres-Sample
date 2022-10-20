@@ -19,18 +19,21 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from operator import attrgetter
 
+import os
 import cv2
 import logging
 import numpy as np
+from tempfile import TemporaryDirectory
 from cytomine import CytomineJob
 from cytomine.models import ImageInstance, ImageInstanceCollection, AnnotationCollection, Annotation
 from cytomine.utilities.software import parse_domain_list
 from shapely.geometry import Polygon
+from sldc.locator import mask_to_objects_2d
+from shapely.affinity import affine_transform
 
 __author__ = "Rubens Ulysse <urubens@uliege.be>"
-__contributors__ = ["Marée Raphaël <raphael.maree@uliege.be>", "Stévens Benjamin"]
+__contributors__ = ["Marée Raphaël <raphael.maree@uliege.be>", "Stévens Benjamin", "Romain Mormont <romain.mormont@cytomine.com>"]
 __copyright__ = "Copyright 2010-2022 University of Liège, Belgium, https://uliege.cytomine.org/"
 
 logging.basicConfig()
@@ -38,45 +41,9 @@ logger = logging.getLogger("cytomine.client")
 logger.setLevel(logging.INFO)
 
 
-def find_components(image):
-    contours, hierarchy = cv2.findContours(image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-
-    components = []
-    if len(contours) > 0:
-        top_index = 0
-        tops_remaining = True
-        while tops_remaining:
-            exterior = contours[top_index][:, 0, :].tolist()
-
-            interiors = []
-            # check if there are children and process if necessary
-            if hierarchy[0][top_index][2] != -1:
-                sub_index = hierarchy[0][top_index][2]
-                subs_remaining = True
-                while subs_remaining:
-                    interiors.append(contours[sub_index][:, 0, :].tolist())
-
-                    # check if there is another sub contour
-                    if hierarchy[0][sub_index][0] != -1:
-                        sub_index = hierarchy[0][sub_index][0]
-                    else:
-                        subs_remaining = False
-
-            # add component tuple to components only if exterior is a polygon
-            if len(exterior) > 3:
-                components.append((exterior, interiors))
-
-            # check if there is another top contour
-            if hierarchy[0][top_index][0] != -1:
-                top_index = hierarchy[0][top_index][0]
-            else:
-                tops_remaining = False
-    return components
-
-
 def main(argv):
     with CytomineJob.from_cli(argv) as cj:
-
+        
         images = ImageInstanceCollection()
         if cj.parameters.cytomine_id_images is not None:
             id_images = parse_domain_list(cj.parameters.cytomine_id_images)
@@ -94,9 +61,12 @@ def main(argv):
             resized_height = int(image.height / resize_ratio)
 
             bit_depth = image.bitDepth if image.bitDepth is not None else 8
-
-            image.dump(dest_pattern="/tmp/{id}.jpg", max_size=max(resized_width, resized_height), bits=bit_depth)
-            img = cv2.imread(image.filename, cv2.IMREAD_GRAYSCALE)
+            
+            # download file in a temporary directory for auto-removal
+            with TemporaryDirectory() as tmpdir:
+                download_path = os.path.join(tmpdir, "{id}.jpg")           
+                image.dump(dest_pattern=download_path, max_size=max(resized_width, resized_height), bits=bit_depth)
+                img = cv2.imread(image.filename, cv2.IMREAD_GRAYSCALE)
 
             if cj.parameters.threshold_blocksize % 2 == 0:
                 logging.warning(
@@ -129,37 +99,25 @@ def main(argv):
                 value=2 ** bit_depth
             )
 
-            components = find_components(extended_img)
+            # extract foreground polygons 
+            fg_objects = mask_to_objects_2d(extended_img, background=255, offset=(-extension, -extension))
             zoom_factor = image.width / float(resized_width)
-            for i, component in enumerate(components):
-                converted = []
-                for point in component[0]:
-                    x = int((point[0] - extension) * zoom_factor)
-                    y = int(image.height - ((point[1] - extension) * zoom_factor))
-                    converted.append((x, y))
 
-                components[i] = Polygon(converted)
-
-            # Find the largest component (whole image)
-            largest = max(components, key=attrgetter('area'))
-            components.remove(largest)
-
-            # Only keep components greater than 5% of whole image
+            # Only keep components greater than {image_area_perc_threshold}% of whole image
             min_area = int((cj.parameters.image_area_perc_threshold / 100) * image.width * image.height)
 
+            transform_matrix = [zoom_factor, 0, 0, -zoom_factor, 0, image.height]
             annotations = AnnotationCollection()
-            for component in components:
-                if component.area > min_area:
-                    annotations.append(Annotation(
-                        location=component.wkt,
-                        id_image=image.id,
-                        id_terms=[cj.parameters.cytomine_id_predicted_term],
-                        id_project=cj.parameters.cytomine_id_project
-                    ))
-
-                    if len(annotations) % 100 == 0:
-                        annotations.save()
-                        annotations = AnnotationCollection()
+            for i, (fg_poly, _) in enumerate(fg_objects):
+                upscaled = affine_transform(fg_poly, transform_matrix)
+                if upscaled.area <= min_area:
+                    continue
+                annotations.append(Annotation(
+                    location=upscaled.wkt,
+                    id_image=image.id,
+                    id_terms=[cj.parameters.cytomine_id_predicted_term],
+                    id_project=cj.parameters.cytomine_id_project
+                ))
 
             annotations.save()
 
@@ -170,3 +128,4 @@ if __name__ == "__main__":
     import sys
 
     main(sys.argv[1:])
+
