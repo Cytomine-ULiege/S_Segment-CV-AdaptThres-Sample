@@ -36,9 +36,52 @@ __author__ = "Rubens Ulysse <urubens@uliege.be>"
 __contributors__ = ["Marée Raphaël <raphael.maree@uliege.be>", "Stévens Benjamin", "Romain Mormont <romain.mormont@cytomine.com>"]
 __copyright__ = "Copyright 2010-2022 University of Liège, Belgium, https://uliege.cytomine.org/"
 
-logging.basicConfig()
-logger = logging.getLogger("cytomine.client")
-logger.setLevel(logging.INFO)
+
+
+def localThresholdWithMask(image, mask, block_size=11, delta=0):
+  """Approximate cv2.adaptiveThreshold with a Gaussian filter but with a binary mask excluding areas of the image.
+  These areas should not be considered for computing the thresholds.
+  
+  Parameters
+  ----------
+  image: ndarray
+    The image to threshold
+  mask: ndarray
+    The image mask (only `True` pixels should be considered)
+  block_size: int
+    The size of the neighbourhood for threshold evaluation
+  delta: float
+    Constant subtracted from the mean or weighted mean.
+
+  Returns
+  -------
+  thresh_mask: ndarray
+    The thresholded mask
+  """
+  image[np.logical_not(mask)] = 0
+  kernel1d = cv2.getGaussianKernel(block_size, sigma=-1)
+  kernel2d = np.matmul(kernel1d, kernel1d.transpose())
+  
+  # compute gaussian thresholds with a mask
+  sums = cv2.filter2D(
+    image.astype(float), 
+    ddepth=-1, 
+    kernel=kernel2d, 
+    borderType=cv2.BORDER_ISOLATED|cv2.BORDER_REPLICATE
+  )
+  divs = cv2.filter2D(
+    mask.astype(float), 
+    ddepth=-1, 
+    kernel=kernel2d, 
+    borderType=cv2.BORDER_ISOLATED|cv2.BORDER_REPLICATE
+  )
+  masked_means = sums / divs
+
+  # rectify with delta and remove masked pixels 
+  thresholds = masked_means - delta
+  thresh_mask = (image > thresholds).astype(np.uint8) * 255
+  thresh_mask[np.logical_not(mask)] = 255
+  return thresh_mask
 
 
 def main(argv):
@@ -64,24 +107,27 @@ def main(argv):
             
             # download file in a temporary directory for auto-removal
             with TemporaryDirectory() as tmpdir:
-                download_path = os.path.join(tmpdir, "{id}.jpg")           
+                download_path = os.path.join(tmpdir, "{id}.png")
                 image.dump(dest_pattern=download_path, max_size=max(resized_width, resized_height), bits=bit_depth)
+                # extract image and mask (if any)
                 img = cv2.imread(image.filename, cv2.IMREAD_GRAYSCALE)
+                unchanged = cv2.imread(image.filename, cv2.IMREAD_UNCHANGED)
+                mask = np.ones(img.shape, dtype=bool)
+                if unchanged.ndim == 3 and unchanged.shape[-1] in {2, 4}:  # has a mask
+                    mask = unchanged[:, :, -1].squeeze().astype(bool)
 
-            if cj.parameters.threshold_blocksize % 2 == 0:
+            block_size = cj.parameters.threshold_blocksize
+            if block_size % 2 == 0:
                 logging.warning(
                     "The threshold block size must be an odd number! "
                     "It will be incremented by one."
                 )
-                cj.parameters.threshold_blocksize += 1
-
-            thresholded_img = cv2.adaptiveThreshold(
-                img,
-                2 ** bit_depth,
-                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                cv2.THRESH_BINARY,
-                cj.parameters.threshold_blocksize,
-                cj.parameters.threshold_constant
+                block_size += 1
+            
+            thresholded_img = localThresholdWithMask(
+                img, mask, 
+                block_size=block_size, 
+                delta=cj.parameters.threshold_constant
             )
 
             kernel = np.ones((5, 5), np.uint8)
@@ -129,3 +175,6 @@ if __name__ == "__main__":
 
     main(sys.argv[1:])
 
+
+# docker run -v $(pwd)/data:/images --entrypoint /bin/bash --rm -it segment-cv-adaptthres-sample:dev.rm.v0.0.13
+# python run.py --host https://dev-apps.cytom.in --public_key "074f2cd2-4d3d-4724-b7d4-94e8ea7d183b" --private_key "3542cac5-e928-4e84-a581-022cff2d59d7" --id_project 818 --id_software 32170  --cytomine_id_images 71851 --cytomine_id_predicted_term 884 --max_image_size 2048  --threshold_blocksize 951 --threshold_constant 5 --erode_iterations 3 --dilate_iterations 3 --image_area_perc_threshold 5
