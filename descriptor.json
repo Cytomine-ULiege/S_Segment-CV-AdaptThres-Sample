@@ -1,12 +1,13 @@
 {
   "name": "Segment-CV-AdaptThres-Sample",
   "description": "Detect samples in images using an adaptive threshold.",
+  "schema-version": "cytomine-0.1",
   "container-image": {
     "image": "cytomineuliege/s_segment-cv-adaptthres-sample",
     "index": "docker://",
     "type": "singularity"
-  },
-  "command-line": "[CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [LOG_LEVEL] [CYTOMINE_ID_PREDICTED_TERM] [MAX_IMAGE_SIZE] [THRESHOLD_CONSTANT] [THRESHOLD_BLOCKSIZE] [ERODE_ITERATIONS] [DILATE_ITERATIONS] [IMAGE_AREA_PERC_THRESHOLD]",
+    },
+  "command-line": "python run.py [CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [LOG_LEVEL] [CYTOMINE_ID_IMAGES] [CYTOMINE_ID_PREDICTED_TERM] [MAX_IMAGE_SIZE] [THRESHOLD_CONSTANT] [THRESHOLD_BLOCKSIZE] [ERODE_ITERATIONS] [DILATE_ITERATIONS] [IMAGE_AREA_PERC_THRESHOLD]",
   "inputs": [
     {
       "id": "cytomine_host",
@@ -52,6 +53,18 @@
       "set-by-server": true,
       "optional": false,
       "type": "Number"
+    },
+    {
+      "id": "cytomine_id_images",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine image identifiers",
+      "description": "The identifiers of the images to process. If not specified all images of the project will be processed.",
+      "set-by-server": false,
+      "optional": true,
+      "type": "ListDomain",
+      "uri": "/api/project/$currentProject$/imageinstance.json",
+      "uri-print-attribute": "instanceFilename"
     },
     {
       "id": "cytomine_id_predicted_term",
@@ -133,13 +146,12 @@
       "id": "log_level",
       "value-key": "[@ID]",
       "command-line-flag": "--@id",
-      "name": "Level of log",
-      "description": "The level is given by a value among 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL' (or unset)",
+      "default": "INFO",
+      "name": "Logging verbosity",
+      "description": "The level is given by a value among 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'",
       "set-by-server": false,
       "optional": true,
       "type": "String"
     }
-  ],
-
-  "schema-version": "cytomine-0.1"
+  ]
 }
