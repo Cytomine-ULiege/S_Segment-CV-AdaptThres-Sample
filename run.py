@@ -103,12 +103,12 @@ def main(argv):
             resized_width = int(image.width / resize_ratio)
             resized_height = int(image.height / resize_ratio)
 
-            bit_depth = image.bitDepth if image.bitDepth is not None else 8
+            bits = image.bitPerSample if image.bitPerSample is not None else 8
             
             # download file in a temporary directory for auto-removal
             with TemporaryDirectory() as tmpdir:
                 download_path = os.path.join(tmpdir, "{id}.png")
-                image.dump(dest_pattern=download_path, max_size=max(resized_width, resized_height), bits=bit_depth)
+                image.dump(dest_pattern=download_path, max_size=max(resized_width, resized_height), bits=bits)
                 # extract image and mask (if any)
                 img = cv2.imread(image.filename, cv2.IMREAD_GRAYSCALE)
                 unchanged = cv2.imread(image.filename, cv2.IMREAD_UNCHANGED)
@@ -142,7 +142,7 @@ def main(argv):
                 extension,
                 extension,
                 cv2.BORDER_CONSTANT,
-                value=2 ** bit_depth
+                value=2 ** bits,
             )
 
             # extract foreground polygons 
